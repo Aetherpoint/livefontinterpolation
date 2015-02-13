@@ -1,0 +1,190 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    vertical-align: baseline;
+}
+body {
+    margin: 0;
+}
+a:link, a:visited {
+    color: #CCC;
+    transition: color .5s;
+    -webkit-transition: color .5s;
+    -moz-transition: color .5s;
+}
+a:hover, a:active, a:focus {
+    color: #35B7B3;
+}
+h2 {
+    font-family: georgia;
+    font-variant: small-caps;
+    text-transform: lowercase;
+    color: #777;
+    margin: 5%;
+}
+.master-bar-1, .master-bar-2 {
+/*    -webkit-transition: all .2s ease-out;
+    -moz-transition: all .2s ease-out;
+    -o-transition: all .2s ease-out;
+    transition: all .2s ease-out;*/
+}
+.master-bar-1 {
+    position: absolute;
+    content: '';
+    height: .25rem;
+    top: 0;
+    right: 0;
+    background-color: rgba(0, 180, 222, 1);
+    width: 50%;
+}
+.master-bar-2 {
+    position: absolute;
+    content: '';
+    height: .25rem;
+    top: 0;
+    left: 0;
+    background-color: rgba(221, 0, 0, 1);
+    width: 50%;
+}
+.controls {
+    text-align: center;
+    border-bottom: solid 1px #DDD;
+    padding: 2rem 0 2rem 0;
+    font-family: georgia;
+    line-height: 1.2rem;
+    font-size: 1.1rem;
+    z-index: 100;
+    color: #999;
+    font-variant: small-caps;
+    text-transform: lowercase;
+    opacity: .5;
+    transition: opacity .25s;
+    -webkit-transition: opacity .25s;
+    -moz-transition: opacity .25s;
+}
+.first-num {
+    position: relative;
+    margin: 0 0.8rem 0 1.8rem;
+}
+.second-num {
+    position: relative;
+    margin: 0 0 0 1.8rem; 
+}
+.first-num:before {
+    position: absolute;
+    content: '';
+    height: .75rem;
+    width: 1rem;
+    left: -1.5rem;
+    top: .3rem;
+    background-color: #00B4DE;
+}
+.second-num:before {
+    position: absolute;
+    content: '';
+    height: .75rem;
+    width: 1rem;
+    left: -1.5rem;
+    top: .3rem;
+    background-color: #DD0000;
+}
+
+#interpolateRange {
+    margin: 2rem auto .8rem auto;
+    width: 50%;
+    max-width: 20rem;
+    display: block;
+    text-align: center;
+}
+.controls:hover, .controls:active, .controls:focus {
+    opacity: 1;
+}
+#test {
+    margin: 4.8rem 0;
+    outline: none;
+    font-size: 11rem;
+    pointer-events: none;
+    padding: 0 5%;
+    text-align: center;
+    font-family: helvetica; /* We can progressively enhance an interpolating font on top of this */
+    font-weight: bold;
+}
+input[type="range"] {
+    margin: 0 1rem;
+}
+p {
+    font-family: georgia;
+    color: #BBB;
+    line-height: 1.625rem;
+    margin: 0 5% 1rem 5%;
+}
+p.credit {
+    font-style: italic;
+}
+p.description {
+    padding-top: 3rem;
+}
+footer {
+    border-top: solid 1px #DDD;
+    font-family: georgia;
+    line-height: 1.2rem;
+    font-size: 1.1rem;
+    font-variant: small-caps;
+    letter-spacing: .5px;
+    padding: 2rem 5%;
+    margin-top: 3rem;
+    text-transform: lowercase;
+    text-align: center;
+    transition: opacity .25s;
+    -webkit-transition: opacity .25s;
+    -moz-transition: opacity .25s;
+}
+footer p {
+    margin: -.2rem .5rem;
+    color: #CCC;
+    display: inline-block;
+}
+
+
+/* Media Queries */
+@media (min-width: 32em) {
+    #test {
+        padding: 2rem 10% 0 10%;
+    }
+    p {
+        margin: 0 10% 1rem 10%;
+    }
+    input[type="range"] {
+        padding: 0;
+    }
+    .controls {
+        font-size: 1.4rem;
+    }
+    .first-num {
+        margin: 0 1.8rem 0 1.8rem;
+    }  
+    .second-num:before, .first-num:before {
+        height: .85rem;
+        top: .5rem;
+    }
+}
+@media (min-width: 50em) {
+    #test {
+        padding: 2rem 23% 0 23%;
+    }
+    p {
+        margin: 0 23% 1rem 23%;
+    }
+}
+@media (min-width: 80em) {
+    #test {
+        padding: 2rem 30% 0 30%;
+/*        font-size: 6rem;*/
+    }
+    p {
+        margin: 0 30% 1rem 30%;
+        font-size: 1.3rem;
+        line-height: 1.8rem;
+    }
+}

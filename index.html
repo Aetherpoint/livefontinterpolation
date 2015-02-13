@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Live font interpolation</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Live font interpolation">
+        <meta name="author" content="Niklas von Hertzen, Andrew Johnson">
+        
+        <link href="styles.css" rel="stylesheet">
+        <script type="text/javascript" src="build/jsfont.js"></script>
+        <script type="text/javascript" src="src/jquery.min.js"></script> 
+    </head>
+    <body>
+    
+    <script type="text/javascript">
+
+    $(function(){
+
+        var count;
+
+        var interpolateMultiplier = .5; 
+        var testExample = document.getElementById('test');
+        var interpolater = document.getElementById('interpolateRange');
+        var masterBar1 = document.querySelector(".master-bar-1");
+        var masterBar2 = document.querySelector(".master-bar-2");
+
+        var xAbsoluteCoordinates = [[0]];
+        var yAbsoluteCoordinates = [[0]];
+        var xAbsoluteCoordInterpolate = [[0]];
+        var yAbsoluteCoordInterpolate = [[0]];
+        var xAbsoluteCoordInterpolateBottom = [[0]];
+        var yAbsoluteCoordInterpolateBottom = [[0]];
+
+        var leftSideB = [[0]];
+        var advancedWidth;
+
+        var xMin = [];
+        var xMax = [];
+
+        var firstNum;
+        var secondNum;
+
+        // Add array spaces so we can access them through count
+        for (var i = 1; i < 66; i++) {
+            xAbsoluteCoordinates.push([0]);
+            yAbsoluteCoordinates.push([0]);
+            xAbsoluteCoordInterpolate.push([0]);
+            yAbsoluteCoordInterpolate.push([0]);
+            xAbsoluteCoordInterpolateBottom.push([0]);
+            yAbsoluteCoordInterpolateBottom.push([0]);
+
+            leftSideB.push([0]);
+        }
+
+        // Update the percentage bar
+        function updateBar() {
+            interpolateMultiplier = (parseFloat(interpolater.value) * .01).toFixed(2);
+
+            firstNum = (((1 - parseFloat(interpolateMultiplier)) * 100) + (interpolateMultiplier * 1)).toFixed(0) + "%";
+            secondNum = (interpolateMultiplier * 100).toFixed(0) + "%";
+
+            $('.first-num').text(firstNum);
+            $('.second-num').text(secondNum);
+            masterBar1.style.width = firstNum;
+            masterBar2.style.width = secondNum;
+        }
+
+        var interpolaterInput = interpolater.addEventListener('input', function() {
+            updateBar();
+        }, false);
+
+        // Add a lister to watch for changes in this demo
+        var interpolaterChange = interpolater.addEventListener('change', function() {
+            randomizeFont();
+        }, false);
+
+        // Javascript 'breakpoints'
+        window.addEventListener('resize', function(event){
+            if ((window.innerWidth >= 0) && (window.innerWidth <= 450)) {
+                interpolater.value = 0;
+                updateBar();
+                randomizeFont();
+            }
+            else if ((window.innerWidth >= 451) && (window.innerWidth <= 600)) {
+                interpolater.value = 25;
+                updateBar();
+                randomizeFont();
+            }
+            else if ((window.innerWidth >= 601) && (window.innerWidth <= 1250)) {
+                interpolater.value = 50;
+                updateBar();
+                randomizeFont();
+            }
+            else {
+            }
+        });
+
+        // Compile and serve the font
+        window.URL = window.URL || window.webkitURL; 
+        var style = document.createElement("style");
+        style.type = "text/css";
+
+        document.getElementById("test").appendChild(style);
+        
+        var randomizeFont = function(){
+
+            // H Glyph by DJR: http://djr.com/
+            xAbsoluteCoordInterpolate[43] = [459,459,367,367,616,616,523,523,958,958,863,863,958,958,523,523,616,616,367,367,459,459,27,27,119,119,27,27];
+
+            yAbsoluteCoordInterpolate[43] = [0,87,85,340,340,85,87,0,0,87,85,624,621,712,712,621,624,429,429,624,621,712,712,621,624,85,87,0];
+
+            // I Glyph
+            // xAbsoluteCoordInterpolate[44] = [27,479,479,377,377,479,479,27,27,130,130,27];
+            // yAbsoluteCoordInterpolate[44] = [0,0,87,85,624,621,712,712,621,624,85,87];
+
+            var font = new JSFONT("fonts/ConsolaMono_mod65.ttf", function(){
+
+                    count = 41;
+
+                    // GENERAL ADJUSTMENTS
+
+                    // Increase our max advanced width
+                    font.tables.hhea.data.advancedWidthMax = 1000;
+
+                    // Set Advanced Width Based Off of Multiplier
+                    advancedWidth = parseInt(font.tables.hmtx.data.records[2].hMetrics) + (parseFloat(interpolateMultiplier).toFixed(2)) * 85;
+                    // This doesn't scale proportionately to our letterforms!
+                    font.tables.hmtx.data.records[2].hMetrics = advancedWidth;
+
+                    // CHARACTER ADJUSTMENTS
+
+                    // Iterate this on all the characters
+                    for (w = 1; w < 3; w++) {
+                        count++;
+
+                        // Set left side bearing based off of Multiplier
+                        leftSideB[count] = parseInt(font.tables.hmtx.data.leftSideBearing[count] * (1 - parseFloat(interpolateMultiplier).toFixed(2)) + 200);
+                        
+                        font.tables.hmtx.data.leftSideBearing[count] = leftSideB[count];
+
+                        // Set our minimum and maximum boundaries for our glyph
+                        xMin[count] = 0;
+                        xMax[count] = 2000;
+
+                        font.tables.glyf.glyphs[count].data.xMin = xMin[count];
+                        font.tables.glyf.glyphs[count].data.xMax = xMax[count];
+
+
+                        // GLYPH ADJUSTMENTS
+
+                        // Some of this may be dependant on modifications made manually to the ttx file like swapping the first and last entries and increasing the xMax[count]
+                        // Get Absolute x Coordinates
+                        // Set up the first one 
+                        xAbsoluteCoordinates[count][0] = font.tables.glyf.glyphs[count].data.xCoordinates[0];
+
+                        // Then iterate through the rest adding them up to get the running total
+                        for (var i = 1; i < font.tables.glyf.glyphs[count].data.xCoordinates.length; i++) {
+
+                            xAbsoluteCoordInterpolateBottom[count][i] = parseInt(font.tables.glyf.glyphs[count].data.xCoordinates[i]) + parseInt(xAbsoluteCoordInterpolateBottom[count][i - 1]);
+                        }
+
+                        // Get Absolute y Coordinates
+                        // Set up the first one
+                        yAbsoluteCoordinates[count][0] = font.tables.glyf.glyphs[count].data.yCoordinates[0];
+
+                        // Iterate through the rest adding them up to get the running total
+                        for (var i = 1; i < font.tables.glyf.glyphs[count].data.yCoordinates.length; i++) {
+
+                            yAbsoluteCoordInterpolateBottom[count][i] = parseInt(font.tables.glyf.glyphs[count].data.yCoordinates[i]) + parseInt(yAbsoluteCoordInterpolateBottom[count][i - 1]);
+                        }
+
+                        // Interpolate the X & Y points, at the moment all we're doing is directly translating them...
+                        for (var i = 0; i < xAbsoluteCoordinates[count].length; i++) {
+                            xAbsoluteCoordinates[count][i] = (interpolateMultiplier * parseInt(xAbsoluteCoordInterpolate[count][i])).toFixed(0);
+                        }
+                        for (var i = 0; i < yAbsoluteCoordinates[count].length; i++) {
+                            yAbsoluteCoordinates[count][i] = (interpolateMultiplier * parseInt(yAbsoluteCoordInterpolate[count][i])).toFixed(0);
+                        }
+
+                        // Add running totals to convert to absolute coordinates
+                        // Some of this may be dependant on modifications made manually to the ttx file like swapping the first and last entries and increasing the xMax[count]
+                        for (var i = 0; i < font.tables.glyf.glyphs[count].data.xCoordinates.length; i++) {
+
+                            xAbsoluteCoordinates[count][i] = parseInt(font.tables.glyf.glyphs[count].data.xCoordinates[i]) + parseInt(xAbsoluteCoordinates[count][i - 1]);
+                        }
+                        for (var i = 0; i < font.tables.glyf.glyphs[count].data.yCoordinates.length; i++) {
+
+                            yAbsoluteCoordinates[count][i] = parseInt(font.tables.glyf.glyphs[count].data.yCoordinates[i]) + parseInt(yAbsoluteCoordinates[count][i - 1]);
+                        }
+
+                        // Multiply the original coordinates by the first half of the percentage and the big coordinates (we're interpolating them) to by the second half, and add them together.
+
+                        // i.e. - http://www.lucasfonts.com/about/interpolation-theory/
+                        // More exist though
+                        for (var i = 0; i < xAbsoluteCoordinates[count].length; i++) {
+                            xAbsoluteCoordinates[count][i] = parseInt(((1 - parseFloat(interpolateMultiplier).toFixed(2)) * xAbsoluteCoordInterpolateBottom[count][i]).toFixed(0)) + parseInt((parseFloat(interpolateMultiplier).toFixed(2) * parseInt(xAbsoluteCoordInterpolate[count][i])).toFixed(0));   
+                        }
+                        for (var i = 0; i < yAbsoluteCoordinates[count].length; i++) {
+                            yAbsoluteCoordinates[count][i] = parseInt(((1 - parseFloat(interpolateMultiplier).toFixed(2)) * yAbsoluteCoordInterpolateBottom[count][i]).toFixed(0)) + parseInt((parseFloat(interpolateMultiplier).toFixed(2) * parseInt(yAbsoluteCoordInterpolate[count][i])).toFixed(0));
+                        }
+
+                        // Translate absolute coordinates back to relative ones
+                        for (var i = 1; i < xAbsoluteCoordinates[count].length; i++) {
+                            font.tables.glyf.glyphs[count].data.xCoordinates[i] = parseInt(xAbsoluteCoordinates[count][i]) - parseInt(xAbsoluteCoordinates[count][i - 1]);
+                        }
+                        for (var i = 1; i < yAbsoluteCoordinates[count].length; i++) {
+                            font.tables.glyf.glyphs[count].data.yCoordinates[i] = parseInt(yAbsoluteCoordinates[count][i]) - parseInt(yAbsoluteCoordinates[count][i - 1]);
+                        }
+                    };
+
+                    // Compile the font
+                    var writer = this.compile();
+                        
+                    var blobUrl = writer.blob();
+                    style.innerHTML = "@font-face { font-family: 'test'; src: url("+blobUrl+"); } #test { font-family: 'test'  }";
+                           
+                    window.setTimeout(function(){
+                        window.URL.revokeObjectURL(blobUrl);
+                    },50); 
+
+                    // Progressively Enhanced Formatting
+                    testExample.style.fontSize = "22rem";
+                    testExample.style.marginTop = "-10rem";
+                    testExample.style.fontWeight = "normal";
+            });
+        }
+
+        randomizeFont();
+
+        $('button').unbind('click').click(function(){
+            randomizeFont();
+            $(this).prop('disabled', true);
+        });
+    });
+</script>
+    <div class="container">
+        <div class="controls">
+            <div class="interpolate-controls">
+                <div class="master-bar-1" style="width: 50%;"></div>
+                <div class="master-bar-2" style="width: 50%;"></div>
+                <label id="interpolateMultiplyNumber" for="interpolateRange" name="interpolateMultiplyNumber">master 1: <span class="first-num">50%</span>master 2: <span class="second-num">50%</span></label>
+                <input id="interpolateRange" type="range" min="0" max="100" step="1" value="50"></input>
+            </div>
+        </div>
+
+        <div id="test">
+            H
+        </div>
+    </div>
+
+    <p class="description">Slide the input or resize the browser to interpolate the glyphs.</p>
+
+    <footer><p>JSFONT by <a href="https://github.com/niklasvh/experiments.hertzen.com">Niklas von Hertzen</a></p><p>Modified by <a href="https://twitter.com/Aetherpoint">Andrew Johnson</a></p>
+
+    <div class="twitter-button" style="margin: 2rem 0; text-align: center;">
+        <a href="https://twitter.com/share" class="twitter-share-button" data-text="Responsive Typography – Live Webfont Interpolation" data-via="Aetherpoint">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    </div>
+
+    </footer>
+</body>
+</html>
